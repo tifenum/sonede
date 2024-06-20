@@ -1,0 +1,189 @@
+<div class="container-fluid">
+
+<!--  <app-page-title title="Customers" [breadcrumbItems]="breadCrumbItems"></app-page-title>-->
+  <h1>Clients</h1>
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row mb-2">
+
+
+
+
+            <div class="col-sm-4" *ngIf="errorMessage">
+              <div class="search-box me-2 mb-2 d-inline-block">
+                <div class="position-relative">
+                  {{errorMessage}}
+                </div>
+              </div>
+            </div>
+
+
+            <!-- end col-->
+          </div>
+          <div class="table-responsive" *ngIf="customerss">
+            <table class="table align-middle table-nowrap dt-responsive nowrap w-100" id="customerList-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>numero</th>
+                  <th>Nom complet</th>
+                  <th>email</th>
+                  <th>type</th>
+                  <th>solde</th>
+                  <th>etat</th>
+
+                  <!--<th>Rating</th>
+                  <th>Wallet Balance</th>
+                  <th>Joining Date</th>-->
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let customers of customerss | async" id="c_{{customers.id}}">
+                  <td>
+                    <div class="form-check font-size-16">
+                      <input id="customCheck" type="checkbox" class="form-check-input" />
+                      <label class="form-check-label" for="customCheck">&nbsp;</label>
+                    </div>
+                  </td>
+                  <td>{{customers.numCompte}}</td>
+
+                  <td>{{customers.ownerName}}</td>
+                  <td>
+                    <p class="mb-1">{{customers.ownerEmail}}</p>
+
+                  </td>
+                  <td><p class="mb-0">{{customers.compteType}}</p></td>
+                  <td>{{customers.solde}}</td>
+                  <td>{{customers.etat}}</td>
+
+                  <!--<td>
+                    <span class="badge bg-success font-size-12">
+                      <i class="mdi mdi-star me-1"></i>
+                      {{customers.rating}}
+                    </span>
+                  </td>
+                  <td>{{customers.balance}}</td>
+                  <td>{{customers.date | date: 'dd MMM, YYYY'}}</td>-->
+                  <td>
+                    <div class="action-link">
+                      <a *ngIf="customers.etat === 'INACTIVE'" href="javascript: void(0);" class="dropdown-item"  (click)="handleUnblockCustomer(customers)">
+                        <i class="fas fa-pencil-alt text-success me-1"></i> Débloquer
+                      </a>
+                      <a *ngIf="customers.etat === 'ACTIVE'" href="javascript: void(0);" class="dropdown-item" (click)="handleBlockCustomer(customers)">
+                        <i class="fas fa-trash-alt text-danger me-1"></i> Bloquer
+                      </a>
+                    </div>
+                    
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- pagination -->
+          <!--<ul class="pagination pagination-rounded justify-content-end mb-2">
+            <pagination
+              [totalItems]="(total | async)!" [(ngModel)]="service.page">
+            </pagination>
+          </ul>-->
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end row -->
+</div>
+
+<!-- Standard Modal -->
+<ng-template #content role="document" let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title mt-0">Ajout Client</h5>
+    <button type="button" class="btn-close" aria-hidden="true" (click)="modalRef?.hide()"></button>
+  </div>
+  <div class="modal-body">
+   <form (ngSubmit)="handleSaveCustomer()" [formGroup]="newCustomerFormGroup">
+    <div class="row">
+      <div class="col-12">
+        <input type="hidden" name="id" value="" formControlName="ids"/>
+        <div class="mb-3">
+          <label class="control-label">Nom complet</label>
+          <input class="form-control" placeholder="Nom" type="text" name="title" autocomplete="off" formControlName="name"
+              [ngClass]="{'is-invalid': submitted && newCustomerFormGroup.controls['name'].errors}" />
+            <div *ngIf="submitted && newCustomerFormGroup.controls['name'].errors" class="invalid-feedback">
+              <span *ngIf="newCustomerFormGroup.controls['name'].touched && newCustomerFormGroup.controls['name'].errors && newCustomerFormGroup.controls['name'].errors!['name']">nom obligatoire.</span>
+            </div>
+        </div>
+        <div class="mb-3">
+          <label class="control-label">Email</label>
+          <input class="form-control" placeholder="email" type="text" name="email" autocomplete="off" formControlName="email"
+              [ngClass]="{'is-invalid': submitted && form.email.errors}" />
+              <div *ngIf="submitted && form.email.errors" class="invalid-feedback">
+                <span *ngIf="form.email.errors.required">Email obligatoire.</span>
+                <span *ngIf="form.email.errors.pattern">This value should be a valid email.</span>
+              </div>
+        </div>
+        <div class="mb-3">
+          <label class="control-label">Numéro de téléphone</label>
+          <input class="form-control" placeholder="Numéro de téléphone" type="text" name="phoneNumber" autocomplete="off" formControlName="phoneNumber"
+              [ngClass]="{'is-invalid': submitted && form.phone.errors}" />
+            <div *ngIf="submitted && form.phone.errors" class="invalid-feedback">
+              <span *ngIf="form.phone.errors.required">Numéro de téléphone obligatoire.</span>
+            </div>
+        </div>
+        <div class="mb-3">
+          <label class="control-label">Adresse</label>
+          <input class="form-control" placeholder="Adresse" type="text" name="address" autocomplete="off" formControlName="address"
+                 [ngClass]="{'is-invalid': submitted && form.username.errors}" />
+          <div *ngIf="submitted && form.username.errors" class="invalid-feedback">
+            <span *ngIf="form.username.errors.required">adresse obligatoire.</span>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label>Date de naissance</label>
+          <div class="input-group clockpicker">
+            <input bsDatepicker class="form-control" placeholder="yyyy-mm-dd" name="birthDate" formControlName="birthDate">
+            <!-- <div class="input-group-append" (click)="d.toggle()">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+            </div> -->
+          </div>
+        </div>
+        <!--<div class="mb-3">
+          <label class="control-label">Solde</label>
+          <input class="form-control" placeholder="Solde" type="text" autocomplete="off" name="balance" formControlName="balance"
+              [ngClass]="{'is-invalid': submitted && form.address.errors}" />
+            <div *ngIf="submitted && form.balance.errors" class="invalid-feedback">
+              <span *ngIf="form.balance.errors.required">Solde obligatoire</span>
+            </div>
+        </div>-->
+      </div>
+    </div>
+    <button type="submit" [disabled]="!newCustomerFormGroup.valid" class="btn btn-success" id="btn-save-event">
+      Enregistrer
+    </button>
+   </form>
+  </div>
+</ng-template>
+
+<!-- Modal -->
+<div class="modal fade" id="removeItemModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+          <div class="modal-body px-4 py-5 text-center">
+              <button type="button" class="btn-close position-absolute end-0 top-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+              <div class="avatar-sm mb-4 mx-auto">
+                  <div class="avatar-title bg-primary text-primary bg-opacity-10 font-size-20 rounded-3">
+                      <i class="mdi mdi-trash-can-outline"></i>
+                  </div>
+              </div>
+              <p class="text-muted font-size-16 mb-4">Are you Sure You want to Remove this User ?</p>
+
+              <div class="hstack gap-2 justify-content-center mb-0">
+                  <button type="button" class="btn btn-danger" id="remove-item">Remove Now</button>
+                  <button type="button" class="btn btn-secondary" id="close-removeCustomerModal" data-bs-dismiss="modal">Close</button>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+<!-- end removeItemModal -->
